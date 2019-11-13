@@ -1,0 +1,14 @@
+{
+  _id: ObjectId,
+  start_date: Date,
+  task_name: String,
+  notes: [
+    {
+      created_on: Date,
+      message: String
+    }
+  ],
+  completed_on: Date,
+
+
+}

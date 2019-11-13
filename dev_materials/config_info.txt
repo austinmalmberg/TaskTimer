@@ -1,0 +1,4 @@
+task_timer_length= 20 * 60 * 1000  // in ms. Default 20 minutes
+break_length= 10 * 60 * 1000 // in ms. Default 10 minutes
+add_time= 0.5 // adds half the current timer length
+database= <localhost>

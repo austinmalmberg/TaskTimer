@@ -1,0 +1,119 @@
+On Application Open:
+  Connect to database
+    On failure, create new database
+    On success,
+      If task ids from previous session exist,
+        Load tasks into queue
+      Load uncompleted tasks into queue
+      Set Current Task ( dequeue task )
+
+On Close:
+  Save queued task ids to file
+
+On Time Expired:
+  If current task != Break,
+    Update Button ( Begin Break )
+  Flash icon
+
+Start:
+  clear ExpiratoryTimeout
+  ExpiratoryTimeout = create timeout ( On Time Expired, remaining time of current )
+  Update Button ( Pause )
+
+Pause:
+  clear ExpiratoryTimeout
+  Update Button ( Start )
+
+Add Time pressed:
+  Current.Add Time
+
+Create Task pressed:
+  Add task to database
+  If no current,
+    Set Current Task ( dequeue task )
+
+Begin Break pressed:
+  enqueue current task
+  Set Current Task ( Break )
+
+Mark Completed pressed:
+  Update task in database
+  Set Current Task ( Break )
+
+Next Task pressed (while on Break screen):
+  Set Current Task ( dequeue task )
+
+Set Current Task ( task ):
+  current = TaskTimer( task )
+  Update view with current name, notes, time remaining
+  Update button
+
+Update Button ( element, Text, OnClick )
+  Element text = Text
+  Element onclick = OnClick
+
+
+
+Class TaskTimer
+  Constructor ( Task, Expires, On Time Expiration )
+    Task = Task
+    Expires = Date.now() + Default task timer length
+    On Time Expiration = On Time Expiration
+    ExpirationTimeout = setTimeout ( On Time Expiration , Date.now() - Expires)
+    Additional Time = Calculate additional time from configuration value
+
+  Add Time
+    If Expires
+      Expires += Additional Time
+      ExpirationTimeout = setTimeout ( On Time Expiration , Date.now() - Expires)
+    Else
+      Remaining += Additional Time
+
+  On Time Expired ( callback )
+    On Time Expiration = callback
+    If Expires
+      ExpirationTimeout = setTimeout ( On Time Expiration , Date.now() - Expires)
+
+  Start
+    If !Started
+      Expires = Date.now() + Remaining
+      ExpirationTimeout = setTimeout ( On Time Expiration , Date.now() - Expires)
+
+  Stop
+    If Started
+      Remaining = Expires - Date.now()
+      Expires = null
+      ExpirationTimeout = null
+
+  Started
+    return Expires != null
+
+  Get Time ( callback )
+    if !callback
+      remaining = Expires - Date.now()
+      if remaining < 0
+        return 0
+      return remaining
+
+    callback(this.getTime())
+
+
+
+Database Queries:
+
+  onload
+    Read all tasks with completed_on == null, order by ascending start_date
+
+  create new clicked
+    Create new task
+
+  mark completed clicked
+    Update completed_on for current task to Date.now()
+
+  on new note created
+    Update notes with new note
+
+  task history clicked
+    Read all tasks with completed_on date within the past <user input>
+
+  onclose
